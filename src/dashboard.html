@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PhysioLive</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Chatbot Styles */
+    .chat-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #6a2e35;
+        color: white;
+        padding: 12px 18px;
+        border-radius: 50px;
+        cursor: pointer;
+        font-size: 16px;
+        border: none;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        z-index: 999;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .chatbox {
+        display: none; /* Closed by default */
+        position: fixed;
+        bottom: 80px;
+        right: 20px;
+        width: 320px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        overflow: hidden;
+        flex-direction: column;
+        z-index: 1000;
+    }
+    .chat-header {
+        background: #6a2e35;
+        color: white;
+        padding: 12px;
+        text-align: center;
+        font-weight: bold;
+    }
+    .chat-body {
+        padding: 10px;
+        height: 300px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+    .message {
+        margin: 8px 0;
+        padding: 8px 12px;
+        border-radius: 8px;
+        max-width: 80%;
+        word-wrap: break-word;
+    }
+    .bot-message {
+        background: #f1f1f1;
+        align-self: flex-start;
+    }
+    .user-message {
+        background: #6a2e35;
+        color: white;
+        align-self: flex-end;
+    }
+    .chat-footer {
+        display: flex;
+        border-top: 1px solid #ddd;
+    }
+    .chat-footer input {
+        flex: 1;
+        border: none;
+        padding: 10px;
+        font-size: 14px;
+    }
+    .chat-footer button {
+        background: #6a2e35;
+        color: white;
+        border: none;
+        padding: 10px 14px;
+        cursor: pointer;
+    }
+    .exercise-options button {
+        margin: 4px;
+        padding: 8px 10px;
+        border: none;
+        border-radius: 6px;
+        background: #6a2e35;
+        color: white;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    img {
+        width: 100%;
+        border-radius: 8px;
+        margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="navbar-logo">
+            <a href="index.html"><img src="../assets/logo.png" alt="PhysioLive"></a>
+        </div>
+        <div class="navbar-buttons">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- IFRAME DASHBOARD -->
+    <div class="iframe-wrapper">
+        <iframe src="http://localhost:8501" width="100%" height="100%"></iframe>
+    </div>   
+
+    <!-- CHATBOT BUTTON -->
+    <button class="chat-btn" onclick="toggleChat()">💬 PhysioMate</button>
+
+    <!-- CHATBOT POPUP -->
+    <div class="chatbox" id="chatbox">
+        <div class="chat-header">PhysioMate</div>
+        <div class="chat-body" id="chat-body"></div>
+        <div class="chat-footer">
+            <input type="text" id="user-input" placeholder="Type a message...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <!-- CHATBOT SCRIPT -->
+    <script>
+    let step = 0; // 0 = waiting for hello, 1 = choosing exercise, 2 = chat ended
+    const chatBody = document.getElementById('chat-body');
+    const inputField = document.getElementById('user-input');
+
+    function toggleChat() {
+        const chatbox = document.getElementById('chatbox');
+        chatbox.style.display = (chatbox.style.display === 'flex') ? 'none' : 'flex';
+    }
+
+    function addMessage(text, sender = 'bot') {
+        const msg = document.createElement('div');
+        msg.classList.add('message', sender === 'bot' ? 'bot-message' : 'user-message');
+        msg.innerHTML = text;
+        chatBody.appendChild(msg);
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    function sendMessage() {
+        const text = inputField.value.trim();
+        if (text === '') return;
+        addMessage(text, 'user');
+        inputField.value = '';
+
+        // Restart chat if user says "hello"
+        if (text.toLowerCase() === 'hello') {
+            step = 1; // Reset to choosing exercise
+            setTimeout(() => {
+                addMessage('Which exercise do you want to do now?<br><div class="exercise-options"><button onclick="selectExercise(\'Right Hand Horizontal Wrist-Up\')">Right Hand Horizontal Wrist-Up</button><button onclick="selectExercise(\'Right Hand Wrist Up–Down\')">Right Hand Wrist Up–Down</button><button onclick="selectExercise(\'Left Arm Horizontal Lift\')">Left Arm Horizontal Lift</button><button onclick="selectExercise(\'Arm Vertical Lift\')">Arm Vertical Lift</button></div>');
+            }, 500);
+            return;
+        }
+
+        if (step === 0) {
+            setTimeout(() => {
+                addMessage('Please start by saying "hello".');
+            }, 500);
+        } else if (step === 2) {
+            setTimeout(() => {
+                addMessage('Chat ended. Please say "hello" to start again.');
+            }, 500);
+        }
+    }
+
+    function selectExercise(exercise) {
+        let details = '';
+        if (exercise === 'Right Hand Wrist Up–Down') {
+            details = `<b>Right Hand Wrist Up–Down</b><br>
+            <img src="../assets/RHWUD.png" alt="Right Hand Wrist Up–Down"><br>
+            Steps:<br>1. Sit/stand straight, extend right arm forward with palm facing down.<br>2. Move wrist upward (towards you), hold 2–3 seconds.<br>3. Move wrist downward (away), hold 2–3 seconds.<br>4. Repeat 10–15 times, 2–3 sets, keeping forearm steady.`;
+        } else if (exercise === 'Right Hand Horizontal Wrist-Up') {
+            details = `<b>Right Hand Horizontal Wrist-Up</b><br>
+            <img src="../assets/RHHWUE.png" alt="Right Hand Wrist Up–Down"><br>
+            Steps:<br>1. Keep right arm straight, palm facing down at shoulder height.<br>2. Bend wrist upward to 90° (fingers pointing to ceiling), hold 2–3 sec.<br>3. Return slowly to starting position.<br>4. Repeat 10–15 times, 2–3 sets, keeping arm steady.`;
+        } else if (exercise === 'Left Arm Horizontal Lift') {
+            details = `<b>Left Arm Horizontal Lift</b><br>
+            <img src="../assets/LAHLE.png" alt="Left Arm Horizontal Lift"><br>
+            Steps:<br>1. Keep left arm straight out to the side, palm facing down.<br>2. Lift the entire arm upward to 90° (shoulder level), hold 2–3 sec.<br>3. Lower arm slowly back down.<br>4. Repeat 10–15 times, 2–3 sets, with smooth movement.`;
+        } else if (exercise === 'Arm Vertical Lift') {
+            details = `<b>Arm Vertical Lift</b><br>
+            <img src="../assets/AVLE.png" alt="Left Arm Horizontal Lift"><br>
+            Steps:<br>1. Stand straight with arm relaxed, pointing downward by your side.<br>2. Slowly raise the arm upward in front till it reaches overhead.<br>3. Hold for 2–3 sec, then lower back down smoothly.<br>4. Repeat 10–15 times, 2–3 sets, without bending the elbow.`;
+        }
+        addMessage(details);
+
+        setTimeout(() => {
+            addMessage('Thank you! Chat ended.');
+            step = 2; // End chat
+        }, 1000);
+    }
+
+    // ✅ Enable sending message on pressing Enter
+    inputField.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Prevent default newline behavior
+            sendMessage();
+        }
+    });
+    </script>
+</body>
+</html>

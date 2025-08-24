@@ -85,3 +85,6 @@ PhysioLive-A-Wireless-Physiotherapy-Monitoring-System/
 ├── requirements.txt
 └── README.md
 ```
+
+## 📄 License
+This project was developed as a part of the Israeli-Indian Hackathon 2025.

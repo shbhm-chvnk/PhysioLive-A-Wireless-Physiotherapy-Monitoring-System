@@ -1,0 +1,17 @@
+socket
+csv
+os
+fpdf
+plotly
+time
+opencv-python
+mediapipe
+numpy
+pandas
+torch
+torchvision
+scikit-learn
+streamlit
+streamlit-webrtc
+tqdm
+joblib
